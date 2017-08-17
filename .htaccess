@@ -1,0 +1,25 @@
+# Turn rewrite engine on
+Options +FollowSymlinks
+RewriteEngine on
+
+# map neat URL to internal URL
+#RewriteRule ^user/login/$   SignInController.php?action=post [nc,qsa]
+#RewriteRule ^user/logout/([0-9]+)/$   SignInControlller.php?userid=$1&action=get [nc,qsa]
+#RewriteRule ^user/$  SignUpController.php?action=post  [nc,qsa]
+#RewriteRule ^user/([0-9]+)/$  SignUpController.php?userid=$1&action=put  [nc,qsa] 
+#RewriteRule ^user?id=([0-9]+)$  SignUpController.php?userid=$1&action=get [nc,qsa]
+#RewriteRule ^user/delete/([0-9]+)$  SignUpController.php?userid=$1&action=delete [nc,qsa]
+#RewriteRule ^order/$  OrderController.php?action=post [nc,qsa]
+#RewriteRule ^order/([0-9]+)/$    OrderController.php?orderid=$1 [nc,qsa]
+#RewriteRule ^order/all     OrderController.php  [nc,qsa]
+#RewriteRule ^order?userid=([0-9]+)$  OrderController.php?userid=$1 [nc,qsa]
+#RewriteRule ^order?orderid=([0-9]+)$  OrderController.php?orderid=$1 [nc,qsa]
+#RewriteRule ^Product/$ ProductController.php [nc,qsa]
+#RewriteRule ^product/([0-9]+)/$  ProductController.php?productid=$1  [nc,qsa]
+#RewriteRule ^product?productid=([0-9]+)$ ProductController.php?productid=$1&action=get [nc,qsa]
+#RewriteRule ^product/all$ ProductController.php?action=all [nc,qsa]
+#RewriteRule ^product/delete/([0-9]+)$  ProductController.php?productid=$1&action=delete [nc,qsa]
+#RewriteRule ^payment/$  PaymentController/php [nc,qsa]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ %{ENV:BASE}home.php [QSA,L]

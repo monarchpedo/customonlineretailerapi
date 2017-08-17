@@ -1,0 +1,109 @@
+talbe name in database;
+1. userdata
+2. orderdata
+3. paymenydata
+4. productdata
+5. merchantdata
+6. old_history_data
+
+CREATE TABLE `userdetail` (
+  `userId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the userdetail ',
+  `username` varchar(45) NOT NULL,
+  `email` varchar(45) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `mobileNumber` varchar(45) NOT NULL,
+  `createdDate` datetime NOT NULL,
+  `modifiedDate` datetime NOT NULL,
+  `userType` varchar(1) NOT NULL,
+  PRIMARY KEY (`userId`),
+  UNIQUE KEY `email_UNIQUE` (`email`),
+  UNIQUE KEY `mobileNumber_UNIQUE` (`mobileNumber`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the userdetail for userdetail';
+
+
+CREATE TABLE `orderdata` (
+  `orderId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the orderdata',
+  `userId` int NOT NULL,
+  `productId` int NOT NULL,
+  `quantity` int DEFAULT NULL,
+  `totalPrice` int NOT NULL,
+  `status` varchar(45) NOT NULL,
+  `orderedDate` datetime NOT NULL,
+  `delieveredDate` datetime NOT NULL,
+  PRIMARY KEY (`orderId`),
+  KEY `userId_index_orderdata` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the userdetail for orderdata';
+
+
+CREATE INDEX userid_index2 ON paymentdata (userId) USING BTREE;
+
+
+CREATE TABLE `paymentdata` (
+  `payId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the paymentdata',
+  `userId` int NOT NULL,
+  `orderId` int NOT NULL,
+  `totalPrice` int DEFAULT NULL,
+  `paidDate` datetime NOT NULL,
+  PRIMARY KEY (`payId`),
+  KEY `userId_index_paymenttable` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the payment history of paymentdata';
+
+CREATE TABLE `productdata` (
+  `productId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the productdata',
+  `productName` VARCHAR(45) NOT NULL,
+  `productDescription` VARCHAR(45) NOT NULL,
+  `price` int NOT NULL,
+  `merchantId` int NOT NULL,
+  `addedDate` datetime NOT NULL,
+  PRIMARY KEY (`productId`),
+  KEY `userId_index_producttable` (`merchantId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the payment history of productdata';
+
+
+CREATE TABLE `merchantdata` (
+  `merchantId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the merchantdata',
+  `merchantName` VARCHAR(45) NOT NULL,
+  `merchantDescription` VARCHAR(45) NOT NULL,
+  `addedDate` datetime NOT NULL,
+  PRIMARY KEY (`merchantId`),
+  KEY `userId_index_merchanttable` (`merchantId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the payment history of merchantdata';
+
+
+
+
+CREATE TABLE `old_user_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is used to store the old information data of user so that avoid violation',
+  `userId` int(11) NOT NULL,
+  `email` VARCHAR(45) DEFAULT "",
+  `mobileNumber` VARCHAR(45) DEFAULT "",
+  `addedDate` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userId_index_olduserdata` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the payment history of old user data';
+
+
+
+CREATE TABLE `loginhistory` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is used to store the login history of user data',
+  `userId` int(11) NOT NULL,
+  `logoutDate` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userId_index_loginhistory` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the login history of user';
+
+
+
+CREATE TABLE `cartdata` (
+  `cartId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the cartdata',
+  `userId` VARCHAR(45) NOT NULL,
+  `orderId` VARCHAR(45) NOT NULL,
+  `productId` int NOT NULL,
+  `quantity` int NOT NULL,
+  `addedDate` datetime NOT NULL,
+  PRIMARY KEY (`cartId`),
+  KEY `userId_index_cartdata` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the payment history of cartdata';
+
+
+userId,orderId,productId,quantity
