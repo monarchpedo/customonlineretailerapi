@@ -22,9 +22,9 @@ class MerchantDetail{
      //$this->merchantDescription = $array["merchantDescription"];
  }
 
- public function saveMerchant($merchantName,$merchantDescription){
+ public function saveMerchant($merchantName,$merchantDescription,$userId,$locality,$city,$pincode,$state,$country,$latitude,$longitude){
     $time = date('y-m-d H:i:s');
-    $insertQuery = "Insert into merchantdata(merchantName,merchantDescription,addedDate) values(:merchantName,:merchantDescription,:addedDate)";
+    $insertQuery = "Insert into merchantdata(merchantName,merchantDescription,addedDate,userId,locality,city,pincode,state,country,latitude,longitude) values(:merchantName,:merchantDescription,:addedDate,:userId,:locality,:city,:pincode,:state,:country,:latitude,:longitude)";
    try{ 
     $checkMerchantCount = $this->checkMerchantName($merchantName);
     if($checkMerchantCount["count"] >= 1){
@@ -34,6 +34,14 @@ class MerchantDetail{
     $preparedQuery->bindParam(":merchantName",$merchantName);
     $preparedQuery->bindParam(":merchantDescription",$merchantDescription);
     $preparedQuery->bindParam(":addedDate",$time);
+    $preparedQuery->bindParam(":userId",$userId);
+    $preparedQuery->bindParam(":locality",$locality);
+    $preparedQuery->bindParam(":city",$city);
+    $preparedQuery->bindParam(":pincode",$pincode);
+    $preparedQuery->bindParam(":state",$state);
+    $preparedQuery->bindParam(":country",$country);
+    $preparedQuery->bindParam(":latitude",$latitude);
+    $preparedQuery->bindParam(":longitude",$longitude);
     $preparedQuery->execute();
     $result = $this->con->lastInsertId();
     return $result;
@@ -91,7 +99,23 @@ class MerchantDetail{
      file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
  }
 
+}
+
+
+public function getMerchantByCity($cityName){
+  $query = "select * from merchantdata where city = :cityName";
+  try{ 
+   $preparedQuery = $this->con->prepare($query);
+   $preparedQuery->bindParam(":cityName",$cityName);
+   $preparedQuery->execute();
+   $result = $preparedQuery->fetch(PDO::FETCH_ASSOC);
+   return $result;
+ }catch(Exception $e){
+     file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
+ }
+
 } 
+
 
 }
 

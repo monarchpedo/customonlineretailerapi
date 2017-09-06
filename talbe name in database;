@@ -5,6 +5,7 @@ talbe name in database;
 4. productdata
 5. merchantdata
 6. old_history_data
+7. offerdata
 
 CREATE TABLE `userdetail` (
   `userId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the userdetail ',
@@ -24,7 +25,6 @@ CREATE TABLE `userdetail` (
 CREATE TABLE `orderdata` (
   `orderId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the orderdata',
   `userId` int NOT NULL,
-  `productId` int NOT NULL,
   `quantity` int DEFAULT NULL,
   `totalPrice` int NOT NULL,
   `status` varchar(45) NOT NULL,
@@ -32,7 +32,23 @@ CREATE TABLE `orderdata` (
   `delieveredDate` datetime NOT NULL,
   PRIMARY KEY (`orderId`),
   KEY `userId_index_orderdata` (`userId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the userdetail for orderdata';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the order of user';
+
+
+
+CREATE TABLE `merchantorderdata` (
+  `merchantOrderId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the merchantorderdata',
+  `orderId` int NOT NULL,
+  `userId` int NOT NULL,
+  `merchantId` int NOT NULL,
+  `quantity` int DEFAULT NULL,
+  `totalPrice` int NOT NULL,
+  `status` varchar(45) NOT NULL,
+  `orderedDate` datetime NOT NULL,
+  `delieveredDate` datetime NULL,
+  PRIMARY KEY (`merchantOrderId`),
+  KEY `userId_index_orderdata` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the orderdetail for merchantorderdata';
 
 
 CREATE INDEX userid_index2 ON paymentdata (userId) USING BTREE;
@@ -42,6 +58,7 @@ CREATE TABLE `paymentdata` (
   `payId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the paymentdata',
   `userId` int NOT NULL,
   `orderId` int NOT NULL,
+  `merchantId` int NOT NULL,
   `totalPrice` int DEFAULT NULL,
   `paidDate` datetime NOT NULL,
   PRIMARY KEY (`payId`),
@@ -53,6 +70,8 @@ CREATE TABLE `productdata` (
   `productName` VARCHAR(45) NOT NULL,
   `productDescription` VARCHAR(45) NOT NULL,
   `price` int NOT NULL,
+  `quantity` int NOT NULL,
+  `unit` VARCHAR(45) NOT NULL,
   `merchantId` int NOT NULL,
   `addedDate` datetime NOT NULL,
   PRIMARY KEY (`productId`),
@@ -60,6 +79,7 @@ CREATE TABLE `productdata` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the payment history of productdata';
 
 
+/*
 CREATE TABLE `merchantdata` (
   `merchantId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the merchantdata',
   `merchantName` VARCHAR(45) NOT NULL,
@@ -69,7 +89,7 @@ CREATE TABLE `merchantdata` (
   KEY `userId_index_merchanttable` (`merchantId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the payment history of merchantdata';
 
-
+*/
 
 
 CREATE TABLE `old_user_data` (
@@ -99,6 +119,7 @@ CREATE TABLE `cartdata` (
   `userId` VARCHAR(45) NOT NULL,
   `orderId` VARCHAR(45) NOT NULL,
   `productId` int NOT NULL,
+  `merchantId` int NOT NULL,
   `quantity` int NOT NULL,
   `addedDate` datetime NOT NULL,
   PRIMARY KEY (`cartId`),
@@ -107,3 +128,111 @@ CREATE TABLE `cartdata` (
 
 
 userId,orderId,productId,quantity
+
+
+CREATE TABLE `merchantdata` (
+  `merchantId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the merchantdata',
+  `userId` int NOT NULL,
+  `merchantName` VARCHAR(45) NOT NULL,
+  `merchantDescription` VARCHAR(45) DEFAULT '',
+  `Latitude` VARCHAR(45) NOT NULL,
+  `Longitude` VARCHAR(45) NOT NULL,
+  `city` VARCHAR(45) NOT NULL,
+  `state` VARCHAR(45) NOT NULL,
+  `locality` VARCHAR(45) NOT NULL,
+  `country` VARCHAR(45) NOT NULL,
+  `pincode` VARCHAR(45) NOT NULL, 
+  `addedDate` datetime NOT NULL,
+   PRIMARY KEY (`merchantId`),
+   KEY `userId_index_merchanttable` (`userId`)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the payment history of merchantdata';
+
+
+/**/
+Note
+unit will be either 1 piece , 1 litre , 1 pound , 1 kg.
+
+CREATE TABLE `offerdata` (
+  `offerId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to stored the merchantdata',
+  `userId` int NOT NULL,
+  `merchantName` VARCHAR(45) NOT NULL,
+  `offerDescription` VARCHAR(45) NOT NULL,
+  `city` VARCHAR(45) NOT NULL,
+  `Latitude` VARCHAR(45) NOT NULL,
+  `Longitude` VARCHAR(45) NOT NULL, 
+  `addedDate` datetime NOT NULL,
+   PRIMARY KEY (`offerId`),
+   KEY `userId_index_offertable` (`userId`)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the offer of merchant to customer';
+
+
+
+
+
+
+CREATE TABLE `uorder` (
+  `orderId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to store the order',
+  `userId` int NOT NULL,
+  `orderName` VARCHAR(45) NOT NULL,
+  `deliveryAddress` VARCHAR(45) NOT NULL,
+  `totalItem` int(11) NOT NULL,
+  `totalPrice` int(11) NOT NULL,
+  `mobileNo` VARCHAR(45) NOT NULL,
+  `orderDate` datetime NOT NULL,
+   PRIMARY KEY (`orderId`),
+   KEY `userId_index_order` (`userId`)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the order of customer';
+
+
+
+CREATE TABLE `umcart` (
+  `mcartId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to store the merchant cart information',
+  `orderId` int(11) NOT NULL,
+  `merchantId` int(11) NOT NULL,
+  `merchantName` VARCHAR(45) NOT NULL,
+  `totalItem` int(11) NOT NULL,
+  `totalPrice` int(11) NOT NULL,
+  `status` VARCHAR(45) NOT NULL,
+   PRIMARY KEY (`mcartId`),
+   KEY `userId_index_order` (`orderId`)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the merchant order information from customer';
+
+
+
+CREATE TABLE `upcart` (
+  `pcartId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to store the ordered product of user in cart',
+  `mcartId` int NOT NULL,
+  `productName` VARCHAR(45) NOT NULL,
+  `productId` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` int(11) NOT NULL,
+   PRIMARY KEY (`pcartId`)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the ordered product of cart of customer';
+
+
+
+
+CREATE TABLE `morder` (
+  `morderId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to store the order',
+  `orderId` int(11) NOT NULL, 
+  `userId` int NOT NULL,
+  `merchantId` int NOT NULL,
+  `orderName` VARCHAR(45) NOT NULL,
+  `deliveryAddress` VARCHAR(45) NOT NULL,
+  `totalItem` int(11) NOT NULL,
+  `totalPrice` int(11) NOT NULL,
+  `mobileNo` VARCHAR(45) NOT NULL,
+  `status` VARCHAR(45) NOT NULL,
+  `orderDate` datetime NOT NULL,
+   PRIMARY KEY (`morderId`)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the order of customer';
+
+CREATE TABLE `mcart` (
+  `cartId` int(11) NOT NULL AUTO_INCREMENT COMMENT 'it is auto increment to store the ordered product of merchant in order by customer',
+  `morderId` int NOT NULL,
+  `productName` VARCHAR(45) NOT NULL,
+  `productId` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+   PRIMARY KEY (`cartId`)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the ordered product of merchant in order by customer';
+

@@ -38,6 +38,7 @@ CREATE TABLE `cartdata` (
   `merchantId` int(11) NOT NULL,
   `quantity` int(11) NOT NULL,
   `addedDate` datetime NOT NULL,
+  `status` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`cartId`),
   KEY `userId_index_cartdata` (`userId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the payment history of cartdata';
@@ -128,6 +129,8 @@ CREATE TABLE `merchantorderdata` (
   `status` varchar(45) NOT NULL,
   `orderedDate` datetime NOT NULL,
   `delieveredDate` datetime DEFAULT NULL,
+  `delieverAddress` varchar(100) NOT NULL,
+  `mobileNumber` varchar(100) NOT NULL,
   PRIMARY KEY (`merchantOrderId`),
   KEY `userId_index_orderdata` (`userId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='It is used to store the orderdetail for merchantorderdata';
@@ -211,7 +214,7 @@ CREATE TABLE `orderdata` (
   `userId` int(11) NOT NULL,
   `quantity` int(11) DEFAULT NULL,
   `totalPrice` int(11) NOT NULL,
-  `status` varchar(45) NOT NULL,
+  `status` varchar(45) DEFAULT NULL,
   `orderedDate` datetime NOT NULL,
   `delieveredDate` datetime NOT NULL,
   PRIMARY KEY (`orderId`),
@@ -327,4 +330,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-09-01 14:58:26
+-- Dump completed on 2017-09-06 18:59:00

@@ -11,6 +11,9 @@ require_once 'merchant.php';
 require_once 'order.php';
 require_once 'ProductDetail.php';
 require_once 'ordercomplete.php';
+require_once 'MerchantOrder.php';
+require_once 'Offer.php';
+require_once 'fieldmapping.php';
 require 'vendor/autoload.php';
 require_once 'vendor/slim/slim/Slim/Slim.php';
 
@@ -209,7 +212,7 @@ $app->delete('user/:id',function ($userId) use ($app){
      if($result == 1){
       $response['error'] = true;
       $response['message'] = "invalid username or password";
-        echoResponse(204,$response,$app);
+        echoResponse(201,$response,$app);
      }
      else if(isset($result)){
           $temp = array();
@@ -231,20 +234,31 @@ $app->delete('user/:id',function ($userId) use ($app){
   */
 
 $app->post('/merchant/',function  () use($app){
-    verifyRequiredParams(array('merchantName','merchantDescription'),$app);
+    verifyRequiredParams(array('userId','merchantName','city','locality','pincode','state','country','latitude','longitude'),$app);
     $merchantName = $app->request->post('merchantName');
+    $merchantDescription = "";
+    if($app->request->post('merchantDescription') !== null){
     $merchantDescription = $app->request->post('merchantDescription');
+    }
+    $userId = $app->request->post('userId');
+    $city = $app->request->post('city');
+    $locality = $app->request->post('locality');
+    $pincode = $app->request->post('pincode');
+    $state = $app->request->post('state');
+    $country = $app->request->post('country');
+    $latitude = $app->request->post('latitude');
+    $longitude = $app->request->post('longitude');
     $response =  array();
     $response['error'] = false;
     $merchant = new MerchantDetail();
-    $result = $merchant->saveMerchant($merchantName,$merchantDescription);
+    $result = $merchant->saveMerchant($merchantName,$merchantDescription,$userId,$locality,$city,$pincode,$state,$country,$latitude,$longitude);
     if($result == 0){
        $response['error'] = true;
        $response['message'] = "merchant data is not valid";
        echoResponse(201,$response,$app);
      }
      else if($result != 0){
-      $response['merchnantId'] = $result;
+      $response['merchantId'] = $result;
       echoResponse(201,$response,$app);
      }
     });
@@ -262,7 +276,7 @@ $app->post('/merchant/',function  () use($app){
      if(!isset($result)){
          $response['error'] = true;
          $response['message'] = "merchant is not availabel";
-         echoResponse(204,$response,$app); 
+         echoResponse(200,$response,$app); 
      }
      else{
         $response['MerchantDetail'] = array();
@@ -298,8 +312,8 @@ $app->post('/merchant/',function  () use($app){
      if($result == 0){
         $response['error'] = true;
         $response['message'] = "merchnat has not been deleted";
-        echoResponse(204,$response,$app);
-     }else if($result = 1){
+        echoResponse(201,$response,$app);
+     }else if($result == 1){
         $response['message'] = "merchant has been removed.";
         echoResponse(201,$response,$app);
      }
@@ -329,13 +343,42 @@ $app->get('/merchant/all',function () use ($app){
 
 
 /*
+* URL: http://localhost/startupapp/v1/merchant/?city=x
+* method =  GET 
+* query parameter = city
+*/
+$app->get('/merchant',function() use ($app){
+    $response = array();
+    $response['error'] = false; 
+    if(null === $app->request->get('city') || strlen(trim($app->request->get('city'))) <=0){
+      $response['error'] = true;
+      $response['message'] = "please verify the request parameters";
+      echoResponse(200,$response,$app);
+    }
+    $merchant =  new MerchantDetail();
+    $cityName = $app->request->get('city');
+    $result = $merchant->getMerchantByCity($cityName);
+    if(!isset($result)){
+       $response['error'] = true;
+       $response['message'] = "No merchant availabel rightnow for this location";
+       echoResponse(200,$response,$app);
+     }
+    else{
+       $response['MerchantDetail'] = array();
+       array_push($response['MerchantDetail'], $result);
+       echoResponse(200,$response,$app);
+    }
+});
+
+
+/*
 *URL: http://localhost/startupapp/v1/product/
 *method = POST
 *parameters:productName,productDescription,price,merchantId 
 */
 
 $app->post('/product',function () use ($app){
-   verifyRequiredParams(array('productName','productDescription','price','merchantId'),$app);
+   verifyRequiredParams(array('productName','productDescription','price','merchantId','quantity','unit'),$app);
    $product =  new Product();
    $response = array();
    $response['error'] = false;
@@ -343,11 +386,13 @@ $app->post('/product',function () use ($app){
    $productDescription = $aapp->request->post('productDescription');
    $price = $app->request->post('price');
    $merchantId = $app->request->post('merchantId');
-   $result = $product->saveProduct($productName,$productDescription,$price,$merchantId);
+   $quantity = $app->request->post('quantity');
+   $unit = $app->request->post('unit');
+   $result = $product->saveProduct($productName,$productDescription,$price,$merchantId,$quantity,$unit);
    if($result == 0){
      $response['error'] = true;
      $response['message'] = "product has not been  added to merchnat dashboard"; 
-     echoResponse(204,$response,$app);
+     echoResponse(201,$response,$app);
    }
    else if($result !=0 ){
      $response['error'] = false;
@@ -368,10 +413,11 @@ $app->put('',function () use ($app){
 
 
 /*
-*URL: http://localhost/startupapp/v1/product/
+*URL: http://localhost/startupapp/v1/product/id
 *method = GET 
+* path param - productId
 */
-$app->get('/product:id',function ($productId) use ($app){
+$app->get('/product/:id',function ($productId) use ($app){
    $product = new Product();
    $response = array();
    $response['error'] = false;
@@ -389,16 +435,16 @@ $app->get('/product:id',function ($productId) use ($app){
 });
 
 /*
-*URL: http://localhost/startupapp/v1/product/
+*URL: http://localhost/startupapp/v1/product/merchant/id
 *method = GET 
 parameter: merchantId
 */
 
-$app->get('/product/merchant:id',function ($merchantId) use ($app){
-   $product = new ProductDetail();
+$app->get('/product/merchant/:id',function ($merchantId) use ($app){
+   $product = new Product();
    $response =  array();
    $response['error'] = false;
-   $result = $product->getProductByMerchantId($merchantId);
+   $result = $product->getAllProductsByMerchantId($merchantId);
    if(isset($result)){
        $response['products'] = array();
        array_push($response['products'], $result);
@@ -406,10 +452,41 @@ $app->get('/product/merchant:id',function ($merchantId) use ($app){
    }
    else if(!isset($result)){
        $response['error'] = true;
-       $response['message'] = "productId is not valid";
+       $response['message'] = "merchantId is not valid";
        echoResponse(204,$response,$app);
    }
 });
+
+
+/**
+*URL: http://localhost/startupapp/v1/product?name=abc
+*method = GET 
+* query paramater 
+parameter: productname
+*/
+$app->get('/product',function () use ($app){
+   $response =  array();
+   $response['error'] = false;
+   if(null === $app->request->get('name') || strlen(trim($app->request->get('name'))) <=0){
+       $response['error'] = true;
+       $response['message'] = "please mention name of the product";
+       echoResponse(200,$response,$app);
+   }
+   $productName = $app->request->get('name');
+   $product = new Product();
+   $result = $product->getAllProductsByName($productName);
+   if(isset($result)){
+       $response['products'] = array();
+       array_push($response['products'], $result);
+       echoResponse(200,$response,$app);
+   }
+   else if(!isset($result)){
+       $response['error'] = true;
+       $response['message'] = "productName is not valid";
+       echoResponse(200,$response,$app);
+   }
+});
+
 
 /*
 *URL: http://localhost/startupapp/v1/order/
@@ -431,7 +508,7 @@ $app->post('/order/',function () use ($app){
      if($result == 0){
       $response['error'] = true;
       $response['message'] = "order has not been accepted";
-      echoResponse(204,$response,$app);
+      echoResponse(201,$response,$app);
      }
      else if($result != 0){
          $response['orderId'] = $result;
@@ -458,12 +535,13 @@ parameter: userId,productId,quantity,totalPrice,status
 $app->get('/order/user/:id',function ($userId) use ($app){
   $response =  array();
   $response['error'] = false;
+  $offset = $app->request->get('offset');
   $order =  new Order();
-  $result = $order->getAllOrder($userId);
+  $result = $order->getAllOrder($userId,$offset);
   if(!isset($result)){
     $response['error'] = true;
-    $response['message'] = "no order yet been ordered";
-    echoResponse(204,$response,$app);
+    $response['message'] = "no order yet been placed";
+    echoResponse(200,$response,$app);
   }
   else if(isset($result)){
     $response['order'] = array();
@@ -486,7 +564,7 @@ $app->get('/order/:id',function ($orderId) use ($app){
    if(!isset($result)){
       $response['error'] = true;
       $response['error'] = "No order exit for this query";
-      echoResponse(204,$response,$app);
+      echoResponse(200,$response,$app);
    }
    else if(isset($result)){
      $response['order'] = array();
@@ -508,7 +586,7 @@ $app->delete('/order/:id',function ($orderId) use ($app){
    if($result==0){
       $response['error'] = true;
       $response['error'] = "No order exit for this query";
-      echoResponse(204,$response,$app);
+      echoResponse(201,$response,$app);
    }
    else if($result!=0){
      $response['message'] = "order has been deleted";
@@ -529,7 +607,7 @@ $app->put('/order/:id',function ($orderId) use ($app){
    if($result == 0){
       $response['error'] = true;
       $response['error'] = "No order exit for this query";
-      echoResponse(204,$response,$app);
+      echoResponse(201,$response,$app);
    }
    else if($result != 0 ){
      $response['message'] = "order has been updated";
@@ -551,7 +629,7 @@ $app->put('/order/cancel/:id',function ($orderId) use ($app){
    if($result == 0){
       $response['error'] = true;
       $response['error'] = "No order exit for this query";
-      echoResponse(204,$response,$app);
+      echoResponse(201,$response,$app);
    }
    else if($result != 0){
      $response['message'] = "order has been deleted";
@@ -565,19 +643,21 @@ $app->put('/order/cancel/:id',function ($orderId) use ($app){
 parameter: userId,productId,quantity,totalPrice,status
 */
 $app->post('/order/cart/',function () use ($app){
-   verifyRequiredParams(array('userId','orderId','productId','quantity'),$app);
+   verifyRequiredParams(array('userId','orderId','productId','quantity','merchantId'),$app);
    $userId = $app->request->post('userId');
    $orderId = $app->request->post('orderId');
    $productId = $app->request->post('productId');
    $quantity = $app->request->post('quantity');
+   $merchantId = $app->request->post('merchantId');
+   $status = "pending";
    //$date = date('Y-m-d h:i:s');
    $response['error'] = false;
    $order = new Order();
-   $result = $order->saveCart($userId,$orderId,$productId,$quantity);
+   $result = $order->saveCart($userId,$orderId,$productId,$quantity,$merchantId,$status);
    if($result == 0){
       $response['error'] = true;
       $response['message'] = "error in saving cart of order,please try again";
-      echoResponse(204,$response,$app);
+      echoResponse(201,$response,$app);
    }
    else if($result != 0){
       $response['cartId'] = $result;
@@ -608,7 +688,7 @@ $app->get('/order/cart/:id',function ($orderId) use ($app){
   if(!isset($result)){
      $response['error'] = true;
      $response['message'] = "No cart data availabel for order";
-     echoResponse(204,$response,$app);
+     echoResponse(200,$response,$app);
   }
   else if(isset($result)){
      $response['cart'] = array();
@@ -630,13 +710,108 @@ $app->delete('/order/cart/:id',function ($cartId) use ($app){
      if($result == 0){
        $response['error'] = true;
        $response['message'] = "no cart availabel for order to be deleted";
-       echoResponse(204,$response,$app);
+       echoResponse(201,$response,$app);
      }
      else if($result != 0){
        $response['message']  = "cart has been deleted";
        echoResponse(201,$response,$app);
      }
 });
+
+/*
+*URL: http://localhost/startupapp/v1/merchant/order
+*method = POST
+parameter: merchantorder object
+*/
+$app->post('/merchant/order/',function () use ($app){
+     verifyRequiredParams(array("orderId","userId","merchantId","quantity","totalPrice","status","mobileNumber","address"));
+     $merchantOrder = new MerchantOrder();
+     $response = array();
+     $response['error'] =  false;
+     $orderId =  $app->request->post('orderId');
+     $userId = $app->request->post('userId');
+     $merchantId = $app->request->post('merchantId');
+     $quantity = $app->request->post('quantity');
+     $totalPrice = $app->request->post('totalPrice');
+     $status = $app->request->post('status');
+     $address = $app->request->post('address');
+     $mobileNumber = $app->request->post('mobileNumber');
+     $result = $merchantOrder->saveOrder($orderId,$userId,$merchantId,$quantity,$totalPrice,$status);
+     if($result == 0){
+       $response['error'] = true;
+       $response['message'] = "order has not been saved in merchantSide";
+       echoResponse(201,$response,$app);
+     }
+     else if($result != 0){
+       $response['message']  = "order has been saved in merchantSide";
+       $response['merchantOrderId'] = $result;
+       echoResponse(201,$response,$app);
+     }
+});
+
+/*
+*URL: http://localhost/startupapp/v1/merchant/order
+*method = GET
+parameter: merchantorder object
+*/
+$app->get('/merchant/order/:id',function ($merchantId) use ($app){
+     $merchantOrder = new MerchantOrder();
+     $response = array();
+     $response['error'] =  false;
+     if(null === $app->request->get('offset') || strlen(trim($app->request->get('offset'))) <=0){
+       $response['error'] = true;
+       $response['message'] = "please mention offset for the MerchantOrder";
+       echoResponse(200,$response,$app);
+   }
+     $offset =  $app->request->get('offset');
+     $result = $merchantOrder->getOrderSortByDate($merchantId,$offset);
+     if($result === null){
+       $response['error'] = true;
+       $response['message'] = "No order has been placed";
+       echoResponse(200,$response,$app);
+     }
+     else if($result != 0){
+       $response['message']  = "order has been placed in merchantSide";
+       $response['MerchantOrder'] = array();
+       array_push($response['MerchantOrder'], $result);
+       echoResponse(200,$response,$app);
+     }
+});
+
+/*
+*URL: http://localhost/startupapp/v1/merchant/order
+*method = PUT
+parameter: merchantorder object
+*/
+$app->put('/merchant/order/:id',function ($orderId) use ($app){
+     $merchantOrder = new MerchantOrder();
+     $response = array();
+     $response['error'] =  false;
+     if(null === $app->request->get('offset') || strlen(trim($app->request->get('offset'))) <=0){
+       $response['error'] = true;
+       $response['message'] = "please mention offset for the MerchantOrder";
+       echoResponse(200,$response,$app);
+   }
+     $offset =  $app->request->get('offset');
+     $result = $merchantOrder->getOrderSortByDate($merchantId,$offset);
+     if($result === null){
+       $response['error'] = true;
+       $response['message'] = "No order has been placed";
+       echoResponse(200,$response,$app);
+     }
+     else if($result != 0){
+       $response['message']  = "order has been placed in merchantSide";
+       $response['MerchantOrder'] = array();
+       array_push($response['MerchantOrder'], $result);
+       echoResponse(200,$response,$app);
+     }
+});
+
+
+
+
+
+
 
 $app->run();
 ?>

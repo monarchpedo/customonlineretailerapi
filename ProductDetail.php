@@ -47,17 +47,19 @@
 
 
 
-   public function saveProduct($productName,$productDescription,$price,$merchantId){
+   public function saveProduct($productName,$productDescription,$price,$merchantId,$quantity,$unit){
      
      $time = date('Y-m-d H:i:s'); 
-     $insertQuery = "Insert into productdata('productName','productDescription','price','merchantId','addedDate') values(:productName,:productDescription,:price,:merchantId,:addedDate)";
+     $insertQuery = "Insert into productdata('productName','productDescription','price','merchantId','addedDate','quantity','unit') values(:productName,:productDescription,:price,:merchantId,:addedDate,:quantity,:unit)";
      try{
          $preparedQuery = $this->con->prepare($insertQuery);
          $preparedQuery->bindParam(':productName',$productName);
          $preparedQuery->bindParam(':productDescription',$productDescription);
          $preparedQuery->bindParam(':price',$price);
-         $preparedQuery->bindParam('merchantId',$merchantId);
+         $preparedQuery->bindParam(':merchantId',$merchantId);
          $preparedQuery->bindParam(':addedDate',$time);
+         $preparedQuery->bindParam(':quantity',$quantity);
+         $preparedQuery->bindParam(':unit',$unit);
          $preparedQuery->execute();
          $result = $this->con->lastInsertId();
          return $result;
@@ -99,7 +101,21 @@
 	}catch(Exception $e){
 		file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
 	}
- } 
+ }
+
+  public function getAllProductsByName($productName){
+    $query = "select * from productdata where productName like ? OR productDescription like ?";
+    try{
+       $preparedQuery = $this->con->prepare($query);
+       $preparedQuery->bindParam(1,"$productName%",PDO::PARAM_STR);
+       $preparedQuery->bindParam(2,"$productName%",PDO::PARAM_STR);
+       $preparedQuery->execute();
+       $result = $preparedQuery->fetch(PDO::FETCH_ASSOC);
+       return $result;
+    }catch(Exception $e){
+        file_put_contents("logfile", $e->getMessage()."\n",FILE_APPEND);
+    }
+  } 
 
 
 }
