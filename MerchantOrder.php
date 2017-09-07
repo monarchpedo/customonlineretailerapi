@@ -62,13 +62,16 @@
 
     public function getOrderSortByDate($merchantId,$offset){
       $limit = 20;
-      $query  = "select * from morder where merchantId = :merchantId LIMIT $offset,$limit ORDER BY orderedDate DESC";
+      $query  = "select * from morder where merchantId = :merchantId LIMIT $offset,$limit ORDER BY orderDate DESC";
       try{
        $prepareQuery = $this->con->prepare($query);
        $prepareQuery->bindParam(":merchantId",$merchantId);
        $prepareQuery->execute();
        $result = $prepareQuery->fetch(PDO::FETCH_ASSOC);
-       return $result;
+       if(is_array($result)){
+       	return $result;
+       }
+       return null;
      
        }catch(Exception $e){
            file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
@@ -81,7 +84,7 @@
 
 
     public function deleteOrder($morderId){
-        $deleteOrder = "delete from morder where morderId = :morderId";
+      $deleteOrder = "delete from morder where morderId = :morderId";
        try{
        $prepareQuery = $this->con->prepare($deleteOrder); 
        $prepareQuery->bindParam(":morderId",$morderId);
@@ -92,12 +95,25 @@
      }    
     }
 
+    public function deleteCart($morderId){
+      $deleteOrder = "delete from mcart where morderId = :morderId";
+       try{
+       $prepareQuery = $this->con->prepare($deleteOrder); 
+       $prepareQuery->bindParam(":morderId",$morderId);
+       $result = $prepareQuery->execute();
+       return $result;
+     }catch(Exception $e){
+         file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND); 
+     }   
+    }
 
-    public function cancelOrder($orderId){
-      $updateQuery = "update morder set status = 'cancelled' where orderId = :orderId";
+
+    public function cancelOrder($orderId,$merchantId){
+      $updateQuery = "update morder set status = 'cancelled' where orderId = :orderId and merchantId = :merchantId";
       try{
       $prepareQuery = $this->con->prepare($updateQuery);
       $prepareQuery->bindParam(":orderId",$orderId);
+      $prepareQuery->bindParam(":merchantId",$merchantId);
       $result = $prepareQuery->execute();
       return $result;
       }catch(Exception $e){
@@ -106,16 +122,36 @@
     }
 
 
-    public function updateStatus($orderId){
-      $updateQuery = "update morder set status = 'completed' where orderId = :orderId";
+    public function updateStatus($orderId,$merchantId){
+      $updateQuery = "update morder set status = 'completed' where orderId = :orderId and merchantId = :merchantId";
       try{
       $prepareQuery = $this->con->prepare($updateQuery);
       $prepareQuery->bindParam(":orderId",$orderId);
+      $prepareQuery->bindParam(":merchantId",$merchantId);
       $result = $prepareQuery->execute();
       return $result;
       }catch(Exception $e){
          file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
-      }
+      }      
     }
+
+    public function getMerchantOrderProduct($morderId){
+      $query  = "select * from mcart where morderId = :morderId";
+      try{
+       $prepareQuery = $this->con->prepare($query);
+       $prepareQuery->bindParam(":morderId",$morderId);
+       $prepareQuery->execute();
+       $result = $prepareQuery->fetch(PDO::FETCH_ASSOC);
+       if(is_array($result)){
+       	return $result;
+       }
+       return null;
+     
+       }catch(Exception $e){
+           file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
+       }  	
+    }
+
+}
 
 ?>

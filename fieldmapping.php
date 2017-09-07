@@ -8,9 +8,11 @@
  class Mapping{
    private $tableFieldMapping =  array();
    $tableFieldMapping['offerdata'] = array("offerId","userId","merchantName","offerDescription","city","Latitude","Longitude","addedDate");
-   $tableFieldMapping['merchantorderdata'] = array("merchantOrderId","orderId","userId","merchantId","quantity","totalPrice","status","orderedDate","delieveredDate");
-   $tableFieldMapping['orderdata'] = array("orderId","userId","quantity","totalPrice","status","orderedDate","delieveredDate");
-   $tableFieldMapping['cartdata'] = array("cartId","userId","orderId","productId","merchantId","quantity","addedDate");
+   $tableFieldMapping['morder'] = array("morderId","orderId","userId","merchantId","orderName","deliveryAddress","totalItem","totalPrice","mobileNumber","status","orderDate");
+   $tableFieldMapping['mcart'] = array("cartId","morderId","productName","productId","quantity");
+   $tableFieldMapping['uorder'] = array("orderId","userId","orderName","deliveryAddress","totalItem","totalPrice","mobileNo","orderDate");
+   $tableFieldMapping['umcart'] = array("mcartId","orderId","merchantId","merchantName","totalItem","totalPrice","status");
+   $tableFieldMapping['upcart'] = array("pcartId","mcartId","productName","productId","quantity","price");
    $tableFieldMapping['loginhistory'] = array("id","userId","logoutDate");
    $tableFieldMapping['merchantdata'] = array("merchantId","userId","merchantName","merchantDescription","Latitude","Longitude","city","state","locality","country","pincode","addedDate");
    $tableFieldMapping['old_user_data'] = array("id","userId","email","mobileNumber","addedDate");

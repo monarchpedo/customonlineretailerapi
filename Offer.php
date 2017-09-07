@@ -53,14 +53,17 @@
 
     /*offer of merchant inside 1 month for merchant*/
      public function getOfferByMerchnatName($merchantName,$offset){
-        $limit = 100;
+        $limit = 20;
         $query = "select * from offerdata where merchantName = :merchantName LIMIT $offset,$limit ORDER BY addedDate DESC";
         try{
        $prepareQuery = $this->con->prepare($query);
        $prepareQuery->bindParam(":merchantName",$merchantName);
        $prepareQuery->execute();
        $result = $prepareQuery->fetch(PDO::FETCH_ASSOC);
-       return $result;
+       if(is_array($result)){
+       	 return $result;
+       }
+       return null;
      
        }catch(Exception $e){
            file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
@@ -69,14 +72,17 @@
 
     /*offer of all merchant within city for 1 months offer*/
      public function getOfferByCity($city,$offset){
-     	$limit = 100;
+     	$limit = 30;
         $query = "select * from offerdata where city = :city LIMIT $offset,$limit ORDER BY addedDate DESC";
        try{
        $prepareQuery = $this->con->prepare($query);
        $prepareQuery->bindParam(":city",$city);
        $prepareQuery->execute();
        $result = $prepareQuery->fetch(PDO::FETCH_ASSOC);
-       return $result;
+       if(is_array($result)){
+       	return $result;
+       }
+       return null;
      
        }catch(Exception $e){
            file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);

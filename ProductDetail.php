@@ -24,7 +24,10 @@
          $preparedQuery->bindParam(":productId",$productId);
          $preparedQuery->execute();
          $result = $preparedQuery->fetch(PDO::FETCH_ASSOC);
-         return $result;
+         if(is_array($result)){
+            return $result;
+         }
+         return null;
      }catch(Exception $e){
      	file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
      }
@@ -39,7 +42,10 @@
          $preparedQuery->bindParam(":merchantId",$merchantId);
          $preparedQuery->execute();
          $result = $preparedQuery->fetch(PDO::FETCH_ASSOC);
-         return $result;
+         if(is_array($result)){
+           return $result;
+         }
+         return null;
      }catch(Exception $e){
      	file_put_contents("logfie",$e->getMessage()."\n",FILE_APPEND);
      }

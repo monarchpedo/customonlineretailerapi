@@ -57,7 +57,10 @@ class MerchantDetail{
     $preparedQuery->bindParam(":merchantId",$merchantId);
     $preparedQuery->execute();
     $result = $preparedQuery->fetch(PDO::FETCH_ASSOC);
-    return $result;
+    if(is_array($result)){
+      return $result;
+    }
+    return null;
    }catch(Exception $e){
      file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
    } 
@@ -81,7 +84,10 @@ class MerchantDetail{
       $preparedQuery = $this->con->prepare($query);
       $preparedQuery->execute();
       $result = $preparedQuery->fetch(PDO::FETCH_ASSOC);
-      return $result;
+      if(is_array($result)){
+        return $result;
+      }
+      return null;;
     }catch(Exception $e){
     	file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
     }
@@ -109,7 +115,10 @@ public function getMerchantByCity($cityName){
    $preparedQuery->bindParam(":cityName",$cityName);
    $preparedQuery->execute();
    $result = $preparedQuery->fetch(PDO::FETCH_ASSOC);
-   return $result;
+   if(is_array($result)){
+    return $result;
+   }
+   return null;
  }catch(Exception $e){
      file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
  }

@@ -36,14 +36,17 @@
 
 
 
-   public function getOrderById($orderId){
+   public function getOrderDetails($orderId){
        $query = "select * from uorder where orderId = :orderId";
        try{
          $prepareQuery = $this->con->prepare($query);
          $prepareQuery->bindParam(":orderId",$this->orderId);
          $prepareQuery->execute();
          $result = $prepareQuery->fetch(PDO::FETCH_ASSOC);
-         return $result;
+         if(is_array($result)){
+          return $result;
+         }
+         return null;
        }catch(Exception $e){
          file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
        }
@@ -83,7 +86,10 @@
        $prepareQuery->bindParam(":userId",$userId);
        $prepareQuery->execute();
        $result = $prepareQuery->fetch(PDO::FETCH_ASSOC);
-       return $result;
+       if(is_array($result)){
+         return $result;
+       }
+       return null;
      
        }catch(Exception $e){
            file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
@@ -93,13 +99,16 @@
 
 
    public function getOrderByOrderId($orderId){
-      $query = "select * from uorder where orderId = :orderId";
+      $query = "select * from umcart where orderId = :orderId";
        try{
        $prepareQuery = $this->con->prepare($query);
        $prepareQuery->bindParam(":orderId",$orderId);
        $prepareQuery->execute();
        $result = $prepareQuery->fetch(PDO::FETCH_ASSOC);
-       return $result;
+       if(is_array($result)){
+         return $result;
+       }
+       return null;
      
        }catch(Exception $e){
            file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
@@ -205,7 +214,10 @@
         $prepareQuery->bindParam(":orderId",$orderId);
         $prepareQuery->execute();
         $result = $prepareQuery->fetch(PDO::FETCH_ASSOC);
-        return $result;
+        if(is_array($result)){
+          return $result;
+        }
+        return null;
        }catch(Exception $e){
          file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
        }
@@ -219,7 +231,10 @@
         $prepareQuery->bindParam(":mcartId",$mcartId);
         $prepareQuery->execute();
         $result = $prepareQuery->fetch(PDO::FETCH_ASSOC);
-        return $result;
+        if(is_array($result)){
+          return $result;
+        }
+        return null;
        }catch(Exception $e){
          file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
        }
@@ -227,11 +242,24 @@
 
    
 
-   public function deleteCart($cartId){
-    $deleteQuery = "delete from cartdata where cartId = :cartId";
+   public function deleteMCart($orderId){
+    $deleteQuery = "delete from umcart where orderId  = :orderId";
     try{
      $prepareQuery =  $this->con->prepare($deleteQuery);
-     $prepareQuery->bindParam(":cartId",$cartId);
+     $prepareQuery->bindParam(":orderId",$orderId);
+     $result = $prepareQuery->execute();
+     return $result;
+    }catch(Exception $e){
+       file_put_contents("logfile",$e->getMessage()."\n",FILE_APPEND);
+    }
+   }
+
+
+   public function deletePCart($mcartId){
+      $deleteQuery = "delete from upcart where mcartId  = :mcartId";
+    try{
+     $prepareQuery =  $this->con->prepare($deleteQuery);
+     $prepareQuery->bindParam(":mcartId",$mcartId);
      $result = $prepareQuery->execute();
      return $result;
     }catch(Exception $e){

@@ -37,7 +37,10 @@ public function signIn($username,$password,$loginType){
       $preparedQuery->bindParam(":password",$password);
       $preparedQuery->execute();
       $result = $preparedQuery->fetch(PDO::FETCH_ASSOC);
-      return $result;
+      if(is_array($result)){
+        return $result;
+      }
+      return null;
    }else if ($loginType == 2){
       $numberCheck = $this->checkNumber($username);
       if($numberCheck["count"]!=1){
@@ -48,7 +51,10 @@ public function signIn($username,$password,$loginType){
       $preparedQuery->bindParam(":password",$password);
       $preparedQuery->execute();
       $result = $preparedQuery->fetch(PDO::FETCH_ASSOC);
-      return $result;    
+      if(is_array($fetch)){
+        return $result;
+      }
+      return null;  
    }
 }
 
